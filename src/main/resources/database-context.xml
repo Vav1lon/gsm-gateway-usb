@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <bean id="poolProperties" class="org.apache.tomcat.jdbc.pool.PoolProperties">
+        <property name="url" value="${smsservice.jdbc.url}"/>
+        <property name="driverClassName" value="${smsservice.jdbc.driver}"/>
+        <property name="username" value="${smsservice.jdbc.user}"/>
+        <property name="password" value="${smsservice.jdbc.password}"/>
+        <property name="validationQuery" value="SELECT 1"/>
+    </bean>
+
+    <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
+        <property name="poolProperties" ref="poolProperties"/>
+    </bean>
+
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="hibernateProperties">
+            <value>
+                hibernate.dialect=${smsservice.jdbc.dialect}
+                hibernate.hbm2ddl.auto=${smsservice.jdbc.generateDdl}
+                hibernate.show_sql=${smsservice.jdbc.showSql}
+            </value>
+        </property>
+        <property name="packagesToScan">
+            <list>
+                <value>ru.acti.entity.internal</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+</beans>
